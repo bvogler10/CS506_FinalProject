@@ -25,3 +25,57 @@
 **What is your test plan? (e.g. withhold 20% of data for testing, train on data collected in October and test on data collected in November, etc.).**
 - We will train the data collected from web scraping and data sets from late February to March, but this data isn’t that reliant on time
 - We will withhold 25% of the data collected for testing, and train the data on the other 75%
+
+## Running the Code
+
+This project includes a **Next.js frontend** and a **Django backend** using **Pipenv** for the backend environment.
+
+### Step 1: Clone the repository
+
+```bash
+git clone https://github.com/bvogler10/CS506_FinalProject.git
+cd CS506_FinalProject
+```
+
+### Step 2: Backend (Django)
+Open a terminal window
+```bash
+cd new-game-plus-backend
+```
+
+Activate Pipenv and install dependencies
+```bash
+pipenv shell
+pipenv install
+```
+
+Start the Django server
+```bash
+python manage.py runserver
+```
+
+The server should now be running at:
+```bash
+http://127.0.0.1:8000/
+```
+
+### Step 3: Frontend (Next.js)
+Open a new terminal window
+```bash
+cd new-game-plus-frontend
+```
+
+Install frontend dependencies
+```bash
+npm install
+```
+
+Start the frontend development server
+```bash
+npm run dev
+```
+
+Open your browser and go to:
+```bash
+http://localhost:3000
+```
