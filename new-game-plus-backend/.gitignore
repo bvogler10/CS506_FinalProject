@@ -1,1 +1,2 @@
-/newgameplus/data/games.csv
+/newgameplus/data/*.csv
+/newgameplus/data/*.json
