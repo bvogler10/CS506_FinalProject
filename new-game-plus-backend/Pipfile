@@ -7,6 +7,9 @@ name = "pypi"
 django-cors-headers = "*"
 django = "*"
 djangorestframework = "*"
+kagglehub = "*"
+pandas = "*"
+duckdb = "*"
 
 [dev-packages]
 
