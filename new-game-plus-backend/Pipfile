@@ -9,8 +9,11 @@ django = "*"
 djangorestframework = "*"
 pandas = "*"
 scikit-learn = "*"
+jupyter = "*"
+ipykernel = "*"
 
 [dev-packages]
+notebook = "*"
 
 [requires]
 python_version = "3.12"
