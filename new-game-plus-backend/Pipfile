@@ -9,6 +9,7 @@ django = "*"
 djangorestframework = "*"
 pandas = "*"
 scikit-learn = "*"
+kagglehub = "*"
 
 [dev-packages]
 
