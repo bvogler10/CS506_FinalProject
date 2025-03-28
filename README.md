@@ -41,7 +41,13 @@ Activate Pipenv and install dependencies
 pipenv shell
 pipenv install
 ```
-
+Download the Kaggle dataset as a zip file and insert ONLY the games.json file into a data folder:
+```
+new-game-plus-backend
+|____newgameplus
+      |_____data
+            |____ games.json
+```
 Start the Django server
 ```bash
 python manage.py runserver

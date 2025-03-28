@@ -10,8 +10,11 @@ djangorestframework = "*"
 pandas = "*"
 scikit-learn = "*"
 kagglehub = "*"
+jupyter = "*"
+ipykernel = "*"
 
 [dev-packages]
+notebook = "*"
 
 [requires]
 python_version = "3.12"
