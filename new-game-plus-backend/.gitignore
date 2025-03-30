@@ -1,2 +1,3 @@
 /newgameplus/data/*.csv
 /newgameplus/data/*.json
+/newgameplus/__pycache__
