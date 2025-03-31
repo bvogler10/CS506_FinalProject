@@ -34,7 +34,7 @@ def load_data():
     # Generate the CSV file if it doesn't exist by calling the function
     prepare_data_if_missing()
     
-    # Load the CSV file
+    # Load the CSV filee
     df = pd.read_csv(CSV_PATH)
     
     return df.reset_index(drop=True)
