@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "090e88f3b49af373dc3334422d6715350a0aede27d63356c06dc52f3e5e6e222"
+            "sha256": "dca4db22abd2abeccfceaf2a439779f0b309889975d33ddc5c58f478a2b93f69"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -1093,7 +1093,7 @@
                 "sha256:f486038e44caa08dbd97275a9a35a283a8f1d2f0ee60ac260a1790e76660833c",
                 "sha256:f7de08cbe5551911886d1ab60de58448c6df0f67d9feb7d1fb21e9875ef95e91"
             ],
-            "markers": "python_version >= '3.10'",
+            "markers": "python_version >= '3.12'",
             "version": "==2.2.4"
         },
         "overrides": {
@@ -1782,6 +1782,15 @@
             "markers": "python_version >= '3.10'",
             "version": "==1.15.2"
         },
+        "seaborn": {
+            "hashes": [
+                "sha256:636f8336facf092165e27924f223d3c62ca560b1f2bb5dff7ab7fad265361987",
+                "sha256:93e60a40988f4d65e9f4885df477e2fdaff6b73a9ded434c1ab356dd57eefff7"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+            "version": "==0.13.2"
+        },
         "send2trash": {
             "hashes": [
                 "sha256:0c31227e0bd08961c7665474a3d1ef7193929fedda4233843689baa056be46c9",
@@ -1914,7 +1923,7 @@
                 "sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8",
                 "sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9"
             ],
-            "markers": "python_version >= '2'",
+            "markers": "sys_platform == 'win32'",
             "version": "==2025.2"
         },
         "uri-template": {
