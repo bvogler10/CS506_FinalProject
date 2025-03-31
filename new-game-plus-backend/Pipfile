@@ -13,6 +13,7 @@ kagglehub = "*"
 jupyter = "*"
 ipykernel = "*"
 matplotlib = "*"
+seaborn = "*"
 
 [dev-packages]
 notebook = "*"
