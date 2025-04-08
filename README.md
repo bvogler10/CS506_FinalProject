@@ -137,13 +137,25 @@ Activate Pipenv and install dependencies
 pipenv shell
 pipenv install
 ```
-Download the Kaggle dataset as a zip file and insert ONLY the games.json file into a data folder:
+
+Create a `.env` file in the root backend directory (new-game-plus-backend/.env)
+
+To use the Steam API, you’ll need a personal API key.
+
+You can get it here:
+👉 https://steamcommunity.com/dev/apikey
+
+ - Login or create a Steam account.
+ - Fill in any required domain name (e.g., localhost is fine for local development).
+ - Click "Register" and copy your key.
+
+Once you have your key, add it to your .env file like this:
+
+Add the following line:
 ```
-new-game-plus-backend
-|____newgameplus
-      |_____data
-            |____ games.json
+STEAM_API_KEY=your_steam_api_key
 ```
+
 Start the Django server
 ```bash
 python manage.py runserver
