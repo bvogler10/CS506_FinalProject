@@ -1,3 +1,7 @@
+# data files
 /newgameplus/data/*.csv
 /newgameplus/data/*.json
 /newgameplus/__pycache__
+
+# environment files
+/.env
