@@ -1,6 +1,7 @@
 'use client'
 
 import DemoAPI from "@/api/DemoAPI";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -34,6 +35,7 @@ export default function Home() {
     <div>
       <h1>New Game Plus</h1>
       <h2>{demoText ? demoText : "Loading demo text"}</h2>
+      <Button>Test</Button>
     </div>
   );
 }
