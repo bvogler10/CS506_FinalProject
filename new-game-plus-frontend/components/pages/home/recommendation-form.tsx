@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +14,8 @@ export default function RecommendationForm() {
     if (!steamId.trim()) return;
 
     setIsLoading(true);
-    // Here you would typically make an API call to your backend
-    // For demo purposes, we're just simulating a delay
+    // Add API call or logic to fetch recommendations here
+    // Simulating an API call with a timeout
     setTimeout(() => {
       setIsLoading(false);
       // Redirect or show results
