@@ -4,17 +4,21 @@ import requests
 from django.http import JsonResponse
 from django.conf import settings
 from rest_framework.decorators import api_view
-from ..recommender import load_clustered_data
+from ..recommender import load_clustered_data, load_clustered_metadata
 
 clustered_df = load_clustered_data()
+metadata_df = load_clustered_metadata()
+
+
 excluded = {'appid','price','peak_ccu','windows','mac','linux','genre_cluster','price_cluster','ccu_cluster'}
-genre_cols = [c for c in clustered_df.columns 
-              if c not in excluded 
-              and clustered_df[c].nunique()==2 
-              and clustered_df[c].dtype=='int64']
+genre_cols = [
+    col for col in clustered_df.columns
+    if col not in excluded and clustered_df[col].dtype == 'int64' and clustered_df[col].nunique() == 2
+]
 
 STEAM_API_BASE_URL = "https://api.steampowered.com"
-STEAM_API_KEY      = settings.STEAM_API_KEY
+STEAM_API_KEY = settings.STEAM_API_KEY
+CLUSTER_COLS = ['genre_cluster', 'price_cluster', 'ccu_cluster', 'all_cluster']
 
 @api_view(['GET'])
 def get_owned_games(request):
@@ -66,6 +70,13 @@ def weighted_cosine(u, v, w):
     vw = v * w
     return uw.dot(vw) / (np.linalg.norm(uw) * np.linalg.norm(vw) + 1e-8)
 
+def append_normalized_clusters(df, user, cols):
+    for col in cols:
+        max_val = df[col].max()
+        df[col] = df[col] / max_val
+        user_val = user.get(col, 0) / max_val
+        yield user_val
+
 @api_view(['GET'])
 def recommend_games(request):
     # steamid = request.GET.get('steamid')
@@ -74,9 +85,10 @@ def recommend_games(request):
 
     # 1) fetch & enrich the user's top game
     user_ids = [  # demo, replace with real top-N
-        1145360,
-        367520,
-        250900
+        1818750,
+        383980,
+        2217000,
+        291550
     ]
     enriched = []
     for appid in user_ids:
@@ -90,38 +102,34 @@ def recommend_games(request):
         return JsonResponse({'error':'no metadata'}, status=500)
 
     # 2) build user profile vector
-    def make_vec(g):
-        v = []
-        # price, normalized later
-        v.append(g['price'])
-        # ccu, normalized later
-        v.append(g['peak_ccu'])
-        # genres
-        for col in genre_cols:
-            v.append(1 if col in g['genres'] else 0)
-        return np.array(v, dtype=float)
+    def make_vec(game):
+        row = clustered_df[clustered_df.appid == game['appid']]
+        genre_vector = row[genre_cols].iloc[0].values if not row.empty else [0] * len(genre_cols)
+        return np.array([game['price'], game['peak_ccu'], *genre_vector], dtype=float)
 
     user_vecs = np.vstack([make_vec(g) for g in enriched])
     user_profile = user_vecs.mean(axis=0)
 
     # 3) build comparison matrix
-    comp = clustered_df[['appid','price','peak_ccu'] + genre_cols].copy()
+    comp = clustered_df[['appid','price','peak_ccu'] + genre_cols + ['genre_cluster', 'price_cluster', 'ccu_cluster', 'all_cluster']].copy()
     comp = comp[comp.peak_ccu >= 100]  # filter
-    M = comp[['price','peak_ccu'] + genre_cols].to_numpy(dtype=float)
+    M = comp[['price','peak_ccu'] + genre_cols + ['genre_cluster', 'price_cluster', 'ccu_cluster', 'all_cluster']].to_numpy(dtype=float)
 
     # 4) normalize numeric columns in M & user_profile
-    #    price
-    pr_mean, pr_std = M[:,0].mean(), M[:,0].std()
-    M[:,0] = (M[:,0] - pr_mean)/ (pr_std+1e-8)
-    user_profile[0] = (user_profile[0] - pr_mean)/(pr_std+1e-8)
-    #    peak_ccu (log then norm)
-    M[:,1] = np.log1p(M[:,1])
-    cc_mean, cc_std = M[:,1].mean(), M[:,1].std()
-    M[:,1] = (M[:,1] - cc_mean)/(cc_std+1e-8)
-    user_profile[1] = (np.log1p(user_profile[1]) - cc_mean)/(cc_std+1e-8)
+    def normalize_column(col, values, user_val, transform=None):
+        if transform:
+            values = transform(values)
+            user_val = transform(user_val)
+        mean, std = values.mean(), values.std()
+        return (values - mean) / (std + 1e-8), (user_val - mean) / (std + 1e-8)
 
-    # 5) build weight vector: [price, CCU, *genres]
-    w = np.array([0.4, 0.4] + [5.0]*len(genre_cols))
+    M[:,0], user_profile[0] = normalize_column(M[:,0], M[:,0], user_profile[0])
+    M[:,1], user_profile[1] = normalize_column(M[:,1], M[:,1], user_profile[1], transform=np.log1p)
+    
+    user_profile = np.append(user_profile, list(append_normalized_clusters(comp, enriched[0], CLUSTER_COLS)))
+
+    # 5) build weight vector: [price, CCU, *genres] + [genre_cluster, price_cluster, ccu_cluster, all_cluster]
+    w = np.array([0.2, 0.3] + [3.0]*len(genre_cols) + [1.0, 0.5, 0.5, 1.0])
 
     # 6) compute weighted cosine similarities
     sims = np.array([weighted_cosine(user_profile, row, w) for row in M])
@@ -130,8 +138,15 @@ def recommend_games(request):
     comp = comp[~comp.appid.isin(user_ids)]
     top = comp.nlargest(15,'similarity')
 
-    return JsonResponse({'recommendations':
-        top[['appid','price','peak_ccu','similarity']].to_dict(orient='records')
+    # Merge with metadata
+    top_merged = top.merge(metadata_df, on='appid', how='left')
+
+    # Pick frontend-friendly fields
+    frontend_fields = ['appid', 'name', 'header_image', 'short_description', 'price', 'peak_ccu', 'similarity']
+
+    # Return enriched frontend data
+    return JsonResponse({
+        'recommendations': top_merged[frontend_fields].to_dict(orient='records')
     })
 
 def fetch_game_metadata(appid):

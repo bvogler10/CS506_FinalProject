@@ -5,7 +5,7 @@ from kagglehub import KaggleDatasetAdapter
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(APP_DIR, 'data', 'games.csv')
-CLUSTERED_PICKLE_PATH = os.path.join(APP_DIR, "data", "clustered_steam_data.pkl")
+CLUSTERED_MODEL_PICKLE_PATH = os.path.join(APP_DIR, "data", "clustered_steam_data.pkl")
 
 # This function prepares the data by downloading the CSV file from KaggleHub if it doesn't exist
 def prepare_data_if_missing():
@@ -40,6 +40,9 @@ def load_raw_data():
     return df.reset_index(drop=True)
 
 def load_clustered_data():
-    if not os.path.exists(CLUSTERED_PICKLE_PATH):
-        raise FileNotFoundError(f"Missing clustered data at: {CLUSTERED_PICKLE_PATH}")
-    return pd.read_pickle(CLUSTERED_PICKLE_PATH)
+    if not os.path.exists(CLUSTERED_MODEL_PICKLE_PATH):
+        raise FileNotFoundError(f"Missing clustered data at: {CLUSTERED_MODEL_PICKLE_PATH}")
+    return pd.read_pickle(CLUSTERED_MODEL_PICKLE_PATH)
+
+def load_clustered_metadata():
+    return pd.read_pickle(os.path.join(APP_DIR, "data", "clustered_steam_metadata.pkl"))
