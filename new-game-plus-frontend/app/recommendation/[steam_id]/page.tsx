@@ -9,6 +9,7 @@ export default function RecommendationsPage() {
   const { steam_id } = useParams();
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -19,6 +20,7 @@ export default function RecommendationsPage() {
         setRecommendations(data);
       } catch (error) {
         console.error("Error fetching recommendations:", error);
+        setError("Failed to load recommendations. Error: " + error);
       } finally {
         setLoading(false);
       }
@@ -43,7 +45,13 @@ export default function RecommendationsPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center mt-20">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            <p className="mt-4 text-gray-400 text-lg">Loading recommendations...</p>
+            <p className="mt-4 text-gray-400 text-lg">
+              Loading recommendations...
+            </p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center mt-20">
+            <p className="text-red-400 text-lg">{error}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
