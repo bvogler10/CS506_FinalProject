@@ -4,23 +4,20 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function RecommendationForm() {
   const [steamId, setSteamId] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!steamId.trim()) return;
 
-    setIsLoading(true);
-    // Add API call or logic to fetch recommendations here
-    // Simulating an API call with a timeout
-    setTimeout(() => {
-      setIsLoading(false);
-      // Redirect or show results
-      alert(`Getting recommendations for Steam ID: ${steamId}`);
-    }, 1500);
+    e.preventDefault();
+    if (steamId.trim()) {
+      router.push(`/recommendations/${steamId}`);
+    }
   };
 
   return (
@@ -28,23 +25,16 @@ export default function RecommendationForm() {
       <div className="relative">
         <Input
           type="text"
-          placeholder="Enter your Steam ID"
+          placeholder="Enter your Steam ID..."
           value={steamId}
           onChange={(e) => setSteamId(e.target.value)}
-          className="text-white placeholder:text-gray-500 h-12 pr-24"
+          className="h-12 pr-24"
         />
         <Button
           type="submit"
-          disabled={isLoading || !steamId.trim()}
           className="absolute right-1 top-1 h-10 cursor-pointer"
         >
-          {isLoading ? (
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-          ) : (
-            <>
-              Go <ArrowRight className="ml-2 h-4 w-4" />
-            </>
-          )}
+          Go <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
       <p className="text-sm text-gray-400">

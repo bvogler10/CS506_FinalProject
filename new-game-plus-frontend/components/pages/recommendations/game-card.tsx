@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, ExternalLink } from "lucide-react";
 import { formatNumber } from "@/lib/utils";
-import { SimilarityMeter } from "@/components/pages/recommendation/similarity-meter";
+import { SimilarityMeter } from "@/components/pages/recommendations/similarity-meter";
 
 interface Game {
   appid: number;

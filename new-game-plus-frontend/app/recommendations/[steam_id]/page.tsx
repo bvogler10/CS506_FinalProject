@@ -1,7 +1,7 @@
 "use client";
 
 import RecommendationAPI from "@/api/RecommendationAPI";
-import { GameCard } from "@/components/pages/recommendation/game-card";
+import { GameCard } from "@/components/pages/recommendations/game-card";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
