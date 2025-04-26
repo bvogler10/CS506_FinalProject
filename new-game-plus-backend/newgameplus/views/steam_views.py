@@ -79,19 +79,19 @@ def append_normalized_clusters(df, user, cols):
 
 @api_view(['GET'])
 def recommend_games(request):
-    # steamid = request.GET.get('steamid')
-    # if not steamid:
-    #     return JsonResponse({'error':'steamid missing'}, status=400)
+    steamid = request.GET.get('steamid')
+    if not steamid:
+        return JsonResponse({'error':'steamid missing'}, status=400)
 
     # 1) fetch & enrich the user's top game
-    user_ids = [  # demo, replace with real top-N
+    game_ids = [  # demo, replace with real top-N
         1818750,
         383980,
         2217000,
         291550
     ]
     enriched = []
-    for appid in user_ids:
+    for appid in game_ids:
         m = fetch_game_metadata(appid)
         if m:
             # fill in CCU from your clustered_df
@@ -135,7 +135,7 @@ def recommend_games(request):
     sims = np.array([weighted_cosine(user_profile, row, w) for row in M])
 
     comp['similarity'] = sims
-    comp = comp[~comp.appid.isin(user_ids)]
+    comp = comp[~comp.appid.isin(game_ids)]
     top = comp.nlargest(15,'similarity')
 
     # Merge with metadata
@@ -144,9 +144,16 @@ def recommend_games(request):
     # Pick frontend-friendly fields
     frontend_fields = ['appid', 'name', 'header_image', 'short_description', 'price', 'peak_ccu', 'similarity']
 
-    # Return enriched frontend data
+    # Create the response and add the store link
+    recommendations = []
+    for _, row in top_merged[frontend_fields].iterrows():
+        game = row.to_dict()
+        game['store_url'] = f"https://store.steampowered.com/app/{game['appid']}"
+        recommendations.append(game)
+
+    # Return frontend data
     return JsonResponse({
-        'recommendations': top_merged[frontend_fields].to_dict(orient='records')
+        'recommendations': recommendations
     })
 
 def fetch_game_metadata(appid):
