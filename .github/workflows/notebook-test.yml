@@ -2,9 +2,9 @@ name: Notebook Test with Sample CSV
 
 on:
   push:
-    branches: [main]
+    branches: main
   pull_request:
-    branches: [main]
+    branches: main
 
 jobs:
   test-notebook:
@@ -23,9 +23,11 @@ jobs:
         run: pip install pipenv
 
       - name: Install dependencies
+        working-directory: new-game-plus-backend
         run: pipenv install --dev
 
       - name: Run notebook with nbconvert
+        working-directory: new-game-plus-backend
         run: |
           pipenv run jupyter nbconvert \
             --to notebook \
