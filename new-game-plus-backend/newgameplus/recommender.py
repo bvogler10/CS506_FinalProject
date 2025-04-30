@@ -2,6 +2,10 @@ import pandas as pd
 import os
 import kagglehub
 from kagglehub import KaggleDatasetAdapter
+from dotenv import load_dotenv
+load_dotenv()
+
+USE_TEST_CSV = os.getenv("USE_TEST_CSV")
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(APP_DIR, 'data', 'games.csv')
@@ -31,6 +35,15 @@ def prepare_data_if_missing():
 
 # This function loads the data from the CSV file
 def load_raw_data():
+    # return csv file based on whether this is github action workflow or not
+    if USE_TEST_CSV == "true":
+        test_path = os.path.join(APP_DIR, "data", "test_games.csv")
+        if os.path.exists(test_path):
+            print(f"[INFO] Using test dataset from: {test_path}")
+            return pd.read_csv(test_path).reset_index(drop=True)
+        else:
+            raise FileNotFoundError(f"[ERROR] Expected test CSV not found at: {test_path}")
+    
     # Generate the CSV file if it doesn't exist by calling the function
     prepare_data_if_missing()
     
