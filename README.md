@@ -146,6 +146,7 @@ You can get it here:
 👉 https://steamcommunity.com/dev/apikey
 
  - Login or create a Steam account.
+ - **Note:** If you haven’t set up the Steam Mobile Authenticator, Steam will likely prompt you to do so before allowing API key access.
  - Fill in any required domain name (e.g., localhost is fine for local development).
  - Click "Register" and copy your key.
 
