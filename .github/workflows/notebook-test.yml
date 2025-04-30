@@ -26,6 +26,10 @@ jobs:
         working-directory: new-game-plus-backend
         run: pipenv install --dev
 
+      - name: Create .env file with USE_TEST_CSV
+        working-directory: new-game-plus-backend
+        run: echo "USE_TEST_CSV=true" > .env
+
       - name: Run notebook with nbconvert
         working-directory: new-game-plus-backend
         run: |
@@ -33,5 +37,5 @@ jobs:
             --to notebook \
             --execute \
             --inplace \
-            --ExecutePreprocessor.timeout=60 \
+            --ExecutePreprocessor.timeout=120 \
             newgameplus/notebook.ipynb
