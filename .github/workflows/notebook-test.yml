@@ -25,10 +25,10 @@ jobs:
       - name: Install dependencies
         working-directory: new-game-plus-backend
         run: pipenv install --dev
-
-      - name: Create .env file with USE_TEST_CSV
+      
+      - name: Copy test CSV to games.csv
         working-directory: new-game-plus-backend
-        run: echo "USE_TEST_CSV=true" > .env
+        run: cp newgameplus/data/test_games.csv newgameplus/data/games.csv
 
       - name: Run notebook with nbconvert
         working-directory: new-game-plus-backend

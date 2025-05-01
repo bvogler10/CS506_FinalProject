@@ -16,7 +16,6 @@ matplotlib = "*"
 seaborn = "*"
 python-decouple = "*"
 nbclient = "*"
-python-dotenv = "*"
 
 [dev-packages]
 notebook = "*"
