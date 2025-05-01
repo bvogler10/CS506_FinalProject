@@ -10,11 +10,3 @@ up:
 
 down:
 	docker-compose down --volumes
-
-run-notebook:
-	docker-compose exec backend pipenv run jupyter nbconvert \
-		--to notebook \
-		--execute \
-		--inplace \
-		--ExecutePreprocessor.timeout=600 \
-		newgameplus/notebook.ipynb
