@@ -115,9 +115,11 @@ Dropping Columns
 - We can use silhouette scores to measure how well our clusters are
 - We create the clusters using the model, and then verify our model by running through 50-100 manual tests to make sure we get recommended a game that makes sense
 
-## Running the Code
+# 🔧 Running the Project
 
 This project includes a **Next.js frontend** and a **Django backend** using **Pipenv** for the backend environment.
+
+## 🖥️ Option 1: Manual Setup (Recommended for Development)
 
 ### Step 1: Clone the repository
 
@@ -188,5 +190,55 @@ Open your browser and go to:
 http://localhost:3000
 ```
 
+## ⚙️ Option 2: Using Makefile (Docker-Based)
 
+### Step 1: Clone the repository
 
+```bash
+git clone https://github.com/bvogler10/CS506_FinalProject.git
+cd CS506_FinalProject
+```
+
+### Step 2: Add .env File to Backend
+Open a terminal window
+```bash
+cd new-game-plus-backend
+```
+
+Create a `.env` file in the root backend directory (new-game-plus-backend/.env)
+
+To use the Steam API, you’ll need a personal API key.
+
+You can get it here:
+👉 https://steamcommunity.com/dev/apikey
+
+ - Login or create a Steam account.
+ - **Note:** If you haven’t set up the Steam Mobile Authenticator, Steam will likely prompt you to do so before allowing API key access.
+ - Fill in any required domain name (e.g., localhost is fine for local development).
+ - Click "Register" and copy your key.
+
+Once you have your key, add it to your .env file like this:
+
+Add the following line:
+```
+STEAM_API_KEY=your_steam_api_key
+```
+
+### Step 3: Build Docker Containers
+
+cd back into the root directory and run the following commands:
+
+```bash
+make build
+```
+```bash
+make up
+```
+
+Once finished, open your browser and go to:
+```bash
+http://localhost:3000
+```
+
+⚠️ **Note**: This method doesn’t support interactive Jupyter notebook execution. However, the outputs are already saved in the notebook.  
+> To re-run the notebook (which can take up to ~30 minutes), follow the **Manual Setup** instructions above.
