@@ -15,9 +15,11 @@ ipykernel = "*"
 matplotlib = "*"
 seaborn = "*"
 python-decouple = "*"
+nbclient = "*"
 
 [dev-packages]
 notebook = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.12"

@@ -124,8 +124,7 @@ def recommend_games(request):
     # 3) build comparison matrix
     comp = clustered_df[['appid','price','peak_ccu'] + genre_cols + CLUSTER_COLS].copy()
     comp = clustered_df[
-        (clustered_df['peak_ccu'] >= 500) &
-        (clustered_df['price'] >= 2.99)
+        (clustered_df['peak_ccu'] >= 500)
     ][['appid','price','peak_ccu'] + genre_cols + CLUSTER_COLS].copy()
     M = comp[['price','peak_ccu'] + genre_cols + CLUSTER_COLS].to_numpy(dtype=float)
 

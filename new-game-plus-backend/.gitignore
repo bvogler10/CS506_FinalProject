@@ -1,8 +1,8 @@
-# data files
-/newgameplus/data/*.csv
+# data files (NOT test csv)
+/newgameplus/data/games.csv
 /newgameplus/data/*.json
-/newgameplus/data/*.pkl
 /newgameplus/__pycache__
+.pytest_cache
 
 # environment files
 /.env
