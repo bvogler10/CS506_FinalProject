@@ -10,7 +10,7 @@ clustered_df = load_clustered_data()
 metadata_df = load_clustered_metadata()
 
 
-excluded = {'appid','price','peak_ccu','windows','mac','linux','genre_cluster','price_cluster','ccu_cluster'}
+excluded = {'appid','price','peak_ccu','windows','mac','linux','genre_cluster','price_cluster','ccu_cluster','categories_cluster'}
 genre_cols = [
     col for col in clustered_df.columns
     if col not in excluded and clustered_df[col].dtype == 'int64' and clustered_df[col].nunique() == 2
@@ -18,7 +18,7 @@ genre_cols = [
 
 STEAM_API_BASE_URL = "https://api.steampowered.com"
 STEAM_API_KEY = settings.STEAM_API_KEY
-CLUSTER_COLS = ['genre_cluster', 'price_cluster', 'ccu_cluster', 'all_cluster']
+CLUSTER_COLS = ['genre_cluster', 'categories_cluster', 'remaining_clusters']
 
 @api_view(['GET'])
 def get_owned_games(request):
@@ -84,12 +84,23 @@ def recommend_games(request):
         return JsonResponse({'error':'steamid missing'}, status=400)
 
     # 1) fetch & enrich the user's top game
-    game_ids = [  # demo, replace with real top-N
-        1818750,
-        383980,
-        2217000,
-        291550
-    ]
+    # game_ids = [  # demo, replace with real top-N
+    #     1818750,
+    #     383980,
+    #     2217000,
+    #     291550
+    # ]
+    user_games_url = f"{STEAM_API_BASE_URL}/IPlayerService/GetOwnedGames/v0001/"
+    params = {
+        'key': STEAM_API_KEY,
+        'steamid': steamid,
+        'include_appinfo': True,
+        'include_played_free_games': True
+    }
+    response = requests.get(user_games_url, params=params)
+    games = response.json().get("response", {}).get("games", [])
+    top_games = sorted(games, key=lambda g: g["playtime_forever"], reverse=True)[:15]
+    game_ids = [g["appid"] for g in top_games]
     enriched = []
     for appid in game_ids:
         m = fetch_game_metadata(appid)
@@ -111,9 +122,12 @@ def recommend_games(request):
     user_profile = user_vecs.mean(axis=0)
 
     # 3) build comparison matrix
-    comp = clustered_df[['appid','price','peak_ccu'] + genre_cols + ['genre_cluster', 'price_cluster', 'ccu_cluster', 'all_cluster']].copy()
-    comp = comp[comp.peak_ccu >= 100]  # filter
-    M = comp[['price','peak_ccu'] + genre_cols + ['genre_cluster', 'price_cluster', 'ccu_cluster', 'all_cluster']].to_numpy(dtype=float)
+    comp = clustered_df[['appid','price','peak_ccu'] + genre_cols + CLUSTER_COLS].copy()
+    comp = clustered_df[
+        (clustered_df['peak_ccu'] >= 500)
+    ][['appid','price','peak_ccu'] + genre_cols + CLUSTER_COLS].copy()
+    M = comp[['price','peak_ccu'] + genre_cols + CLUSTER_COLS].to_numpy(dtype=float)
+
 
     # 4) normalize numeric columns in M & user_profile
     def normalize_column(col, values, user_val, transform=None):
@@ -129,12 +143,12 @@ def recommend_games(request):
     user_profile = np.append(user_profile, list(append_normalized_clusters(comp, enriched[0], CLUSTER_COLS)))
 
     # 5) build weight vector: [price, CCU, *genres] + [genre_cluster, price_cluster, ccu_cluster, all_cluster]
-    w = np.array([0.2, 0.3] + [3.0]*len(genre_cols) + [1.0, 0.5, 0.5, 1.0])
+    w = np.array([0.5, 1.5] + [2.5]*len(genre_cols) + [1.0, 1.0, 1.0])
 
     # 6) compute weighted cosine similarities
     sims = np.array([weighted_cosine(user_profile, row, w) for row in M])
 
-    comp['similarity'] = sims
+    comp['similarity'] = sims * np.log1p(comp['peak_ccu'])
     comp = comp[~comp.appid.isin(game_ids)]
     top = comp.nlargest(15,'similarity')
 
