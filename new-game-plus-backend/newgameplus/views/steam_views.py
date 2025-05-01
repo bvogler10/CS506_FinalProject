@@ -18,7 +18,7 @@ genre_cols = [
 
 STEAM_API_BASE_URL = "https://api.steampowered.com"
 STEAM_API_KEY = settings.STEAM_API_KEY
-CLUSTER_COLS = ['genre_cluster', 'categories_cluster', 'price_cluster', 'ccu_cluster', 'all_cluster']
+CLUSTER_COLS = ['genre_cluster', 'categories_cluster', 'remaining_clusters']
 
 @api_view(['GET'])
 def get_owned_games(request):
@@ -122,7 +122,7 @@ def recommend_games(request):
     user_profile = user_vecs.mean(axis=0)
 
     # 3) build comparison matrix
-    comp = clustered_df[['appid','price','peak_ccu'] + genre_cols + ['genre_cluster', 'price_cluster', 'ccu_cluster', 'all_cluster']].copy()
+    comp = clustered_df[['appid','price','peak_ccu'] + genre_cols + CLUSTER_COLS].copy()
     comp = clustered_df[
         (clustered_df['peak_ccu'] >= 500) &
         (clustered_df['price'] >= 2.99)
@@ -144,7 +144,7 @@ def recommend_games(request):
     user_profile = np.append(user_profile, list(append_normalized_clusters(comp, enriched[0], CLUSTER_COLS)))
 
     # 5) build weight vector: [price, CCU, *genres] + [genre_cluster, price_cluster, ccu_cluster, all_cluster]
-    w = np.array([0.5, 1.5] + [2.5]*len(genre_cols) + [1.0, 1.0, 0.5, 0.5, 1.0])
+    w = np.array([0.5, 1.5] + [2.5]*len(genre_cols) + [1.0, 1.0, 1.0])
 
     # 6) compute weighted cosine similarities
     sims = np.array([weighted_cosine(user_profile, row, w) for row in M])
