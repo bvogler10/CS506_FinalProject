@@ -2,116 +2,189 @@
 
 # New Game +
 
+[FINAL REPORT VIDEO](https://www.youtube.com/watch?v=VQcWLWdOMpQ)
+
 # Final Report
-Data preprocessing and cleaning
-Dropping Null/Empty values
-There were unnamed games in our dataset, we saw that these were most likely mistakes or test/development games. So we dropped the null values in names because we thought it wouldn’t make sense to train the model on these unnamed games and have it recommend unnamed games.
-Dropping Columns
-We dropped columns that we deemed irrelevant or in a non numerical format  in which we could not use or were linearly dependent.
-The list of features dropped includes
-'name','tags','reviews', 'appid', 'detailed_description', 'about_the_game', 'short_description', 'header_image', 'website', 'support_url','support_email','metacritic_url','notes', 'packages', 'developers', 'publishers','screenshots', 'movies','user_score','score_rank','estimated_owners','positive','negative'
-One Hot Encoding
-For string features such as genre, categories and supported languages we implemented one hot encoding. 
-We first obtained a list of every single unique value for each column utilizing a set. 
-After then we turned each unique value into its own corresponding column where for each game, 1 indicated that the game contained the specific genre category or language and 0 indicates the game did not.
-Removing correlated genre and category features
-We utilized a heatmap to help locate correlations between features.
-Any two features with a correlation above a 0.5 threshold, we picked one to remove
-This helped improve model accuracy and reduces redundant information since similar features can potentially double their influence
+## Data preprocessing and cleaning
 
-Detailed description of data modeling methods used so far.
-Features chosen
-We realized that our 300 features was a bit too many for the model, so we had to tone it down a bit
-The majority of these features were created from the one hot encoding of string features, so for now we just got rid of the features we believe wouldn’t impact the clusterings too much (i.e supported_languages & audio_languages)
-This successfully dropped our features to around 90
-We then used the heatmap corrlelation matrix to merge highly correlated features. This then further dropped our features to 66
-However, clustering based on 66 features still felt like a lot, so we decided to create multiple clusters based on the features
-Finding the right K for each clustering
-We utilized the “elbow method” as discussed from lecture, where the optimal K is found through iterating over several values of k (in our case we did 1 - 20) until there was a low inertia AND a low number of clusters
-Based on this, we found that around k=16 worked the best for genres, k=5 for pricing, and k=5 for peak concurrent users, k=39 for categories, and k=18 for the remaining columns
-Kmeans++
-We utilized the sci-kit learn library in order to initialize the k centroids and keep moving them until they converged. For each cluster, we used Kmeans++
-Silhouette score
-Also from sci-kit learn library, we were able to easily calculate the silhouette scores of our clusterings based on their average distance to other points in its cluster and average distance to points in their nearest neighbor cluster
+### Dropping Null/Empty values
+* There were unnamed games in our dataset, we saw that these were most likely mistakes or test/development games.
+* So we dropped the null values in names because we thought it wouldn’t make sense to train the model on these unnamed games and have it recommend unnamed games.
 
+### Dropping Columns
+* We dropped columns that we deemed irrelevant or in a non-numerical format which we could not use or were linearly dependent.
+* The list of features dropped includes:  
+  `name`, `tags`, `reviews`, `appid`, `detailed_description`, `about_the_game`, `short_description`, `header_image`, `website`, `support_url`, `support_email`, `metacritic_url`, `notes`, `packages`, `developers`, `publishers`, `screenshots`, `movies`, `user_score`, `score_rank`, `estimated_owners`, `positive`, `negative`
 
-Preliminary results. (e.g. we fit a linear model to the data and we achieve promising results, or we did some clustering and we notice a clear pattern in the data)
-Silhouette score evaluation
-According to the silhouette scores of 0.32, 0.03, 0.01 that we measured after clustering, our clustering seems to be okay/not too good, but with a lot of room for improvement (before feature engineering)
-After feature engineering, we successfully increased the scores to 0.65, 0.54, and 0.21
-Data pattern from cluster visualization
-Genre cluster
-These clusters offered lots of insights into what genres are typically paired with each others
-For example, typically games that have genres of Indie, Action, and Adventure go well with each other
-Another example, typically games that have genres of Indie and Casual go well with each other
-This would then be a factor we can use to properly recommend a user a related game
-Categories cluster
-This cluster was very similar to the genre cluster, except for categories
-Pricing distribution cluster
-These clusters tell us the distribution of the pricing for the games
-When recommending similar games, we can take into consideration whether the new game is inside the pricing cluster of the games the user has previously played
-Although we realize that this feature alone isn’t the best, we will make sure to reduce its weight when recommending a game
-Peak concurrent users cluster
-These clusters group the games based on their concurrent user count, which can be another feature to consider when recommending a game. Someone who likes to play popular games might also like other similar popular games
+### One Hot Encoding
+* For string features such as genre, categories and supported languages we implemented one hot encoding.
+* We first obtained a list of every single unique value for each column utilizing a set.
+* We then turned each unique value into its own corresponding column where for each game, 1 indicated that the game contained the specific genre/category/language and 0 otherwise.
 
+### Removing correlated genre and category features
+* We utilized a heatmap to help locate correlations between features.
+* Any two features with a correlation above a 0.5 threshold, we picked one to remove.
+* This helped improve model accuracy and reduce redundant information.
 
-Semantic Text-Based Clustering
-Sentence Transformer
-We used a transformer model to embed the “about_the_game” text field for each game
-Tried this instead of TFIDF to try grouping games based on the semantic meanings of descriptions rather than by the individual words used in the descriptions
-Transformed each description into a vector, added the length of the description as a normalized feature
-Clusters
-After generating the sentence embeddings, we ran KMeans clustering to get clusters based on how the games describe themselves
-We then sampled games from each cluster to interpret their themes
-Preliminary Conclusions
-Clusters captured narrative-heavy single-player games, competitive multiplayer shooters, casual/co-op games, anime and niche indies, and more.
-The cluster content differed from genre or tag clusters, offering a new perspective on how to group and recommend games.
-Games with similar tone or gameplay feel, even with different tags, ended up in the same cluster.
+## Detailed description of data modeling methods used
 
-Modeling Approach
-We utilized separate feature sets for clustering. We clustered based on genre, category, price, peak player count, an all columns cluster and a remaining columns cluster (all features not in the first four). We tried different combinations of clusters for the final model before eventually utilizing the genre cluster, the category cluster and the remaining columns cluster. 
-Our reasoning was that we felt that the model really utilized these descriptive tags of genre and category when recommending other games. Since we aimed to recommend games based on similar games in the user’s profile, it made sense that the model would utilize these features.
+### Features chosen
+* We initially had around 300 features, mostly from one-hot encoding string fields.
+* We dropped features we believed wouldn’t impact clustering much (e.g., supported_languages, audio_languages).
+* This reduced us to ~90 features.
+* Using correlation heatmaps, we merged highly correlated features, reducing down to ~66 features.
+* To reduce dimensionality further, we decided to cluster different feature subsets separately.
 
-Frontend
-Created a user friendly UI for entering their steam ID
-Once their steam ID is entered, the frontend calls the backend to retrieve the list of recommended games and displays them based on how strong each one matches depending on the user’s top games
-Built with React.js and TailwindCSS
+### Finding the right K for clustering
+* Used the elbow method by iterating over a range of `k` values.
+* Selected `k` values based on lowest inertia with reasonable cluster count:
+  * `k=16` for genre
+  * `k=5` for price
+  * `k=5` for peak concurrent users
+  * `k=39` for categories
+  * `k=18` for remaining columns
 
-Backend
-Framework and Architecture:
-Built using Django and Django REST Framework
-Handles API requests from the frontend and communicates with Steam API
-Uses preprocessed .pkl files containing clustered game data for efficient computation
-Data Loading:
-load_clustered_data() loads the full dataframe with genre encodings and cluster labels
-load_clustered_metadata() loads a trimmed version of the dataset for frontend display
-API Endpoint 1: /steam/get_owned_games/:
-Accepts a steamid as a query parameter
-Fetches all owned games from the Steam API
-Filters and sorts the top 15 games by playtime
-Enriches each game with additional metadata like price and genre
-Returns JSON data with fields used by the frontend
-API Endpoint 2: /steam/recommend_games/:
-Fetches top 15 games by playtime
-FIlters out games without sufficient info
-Builds a user profile vector using features like price, genre, and clusters
-Constructs a comparison matrix of valid games
-Filters out obscure games
-Normalizes numeric features
-Computes weighted cosine similarity between the user vector and candidates
-Excludes any games the user already owns
-Returns top 15 most similar games
-Helper Function fetch_game_metadata(appid):
-Calls the Steam API
-Extracts genres and price data
-Handles failures/missing fields
-Model Integration:
-Aligned with the notebook’s clustering strategy
-Uses genre_cluster, categories_cluster, and remaining_clusters
-These clusters were selected based on silhouette score
-Other features are baked into the “remaining” cluster to avoid any overfitting
-Final Output:
-JSON response for each recommendation which includes the title, description, store link, and other characteristics
+### KMeans++
+* Used scikit-learn’s `KMeans` with KMeans++ initialization for efficient and stable clustering.
+* Set `n_init=250` for better convergence.
+
+### Silhouette score
+* Used silhouette score from scikit-learn to measure how well-separated the clusters were.
+* Evaluated average distance to own cluster vs. nearest cluster.
+
+## Preliminary results
+
+### Silhouette score evaluation
+* Initial scores (before feature engineering): 0.32 (genre), 0.03 (price), 0.01 (ccu)
+* After merging features and engineering:  
+  * Genre: 0.65  
+  * Categories: 0.54  
+  * Remaining features: 0.21
+
+### Patterns from cluster visualization
+
+#### Genre cluster
+* Identified typical genre groupings like:
+  * Indie + Action + Adventure
+  * Indie + Casual
+* Used to improve recommendation quality.
+
+#### Categories cluster
+* Captures playstyle-based groupings (e.g., multiplayer, VR, co-op).
+
+#### Pricing cluster
+* Informs how games are priced within clusters.
+* Weighted less heavily in recommendation due to weaker influence.
+
+#### Peak concurrent users cluster
+* Helps group games by popularity.
+* Supports identifying trendy or mass-market titles.
+
+## Semantic Text-Based Clustering
+
+### Sentence Transformer
+* Used transformer model to embed `about_the_game` into vector space.
+* Preferred over TF-IDF for capturing semantic meaning.
+* Added description length as a normalized feature.
+
+### Clustering
+* Applied KMeans on sentence embeddings.
+* Interpreted and labeled clusters by sampling representative games.
+
+### Observations
+* Captured tone/style clusters like:
+  * Narrative-heavy single-player games
+  * Competitive multiplayer
+  * Casual co-op
+  * Anime/niche indies
+* Groupings were different from genre or category, adding a new lens.
+
+## Modeling Approach
+
+* Clustered different subsets of features:
+  * Genre
+  * Category
+  * Price
+  * Peak player count
+  * All features
+  * Remaining features (everything not in above)
+* After experimentation, final model uses:
+  * `genre_cluster`
+  * `categories_cluster`
+  * `remaining_clusters`
+* Chosen due to strongest silhouette scores and best qualitative results.
+* Genre and category tags provided the most informative recommendations.
+
+## Frontend
+
+* Built using **React.js** and **TailwindCSS**.
+* Simple UI where user can enter their Steam ID.
+* Makes a request to the backend and displays 15 recommended games.
+* Each game card shows:
+  * Name
+  * Store image
+  * Price
+  * Peak player count
+  * Match percentage
+* Clicking the card opens the game in the Steam Store.
+
+## Backend
+
+### Framework and Architecture
+* Built using **Django** and **Django REST Framework**.
+* Handles API calls and loads clustered data from `.pkl` files.
+* Communicates with Steam’s public API.
+
+### Data Loading
+* `load_clustered_data()` loads main features and cluster labels.
+* `load_clustered_metadata()` loads a subset of fields for frontend display.
+
+### API Endpoint: `/steam/get_owned_games/`
+* Accepts a Steam ID (`steamid` query param).
+* Calls Steam API to fetch the user’s owned games.
+* Sorts by playtime and keeps top 15.
+* Enriches each game with price and genre from Steam store API.
+* Returns a list of enriched game objects in JSON format.
+
+### API Endpoint: `/steam/recommend_games/`
+* Fetches top 15 played games using `/get_owned_games/` logic.
+* Filters out games with missing cluster data.
+* Builds a user profile vector:
+  * Includes normalized price, CCU, genre indicators, and cluster IDs.
+* Creates a comparison matrix of all valid candidate games.
+* Applies filters:
+  * Games must have at least 500 peak CCU.
+  * Games must cost more than $2.99.
+  * Games already owned by user are excluded.
+* Computes weighted cosine similarity between user profile and each candidate.
+* Sorts results by similarity score (adjusted by log of peak CCU).
+* Returns 15 most similar games in JSON format.
+
+### Helper: `fetch_game_metadata(appid)`
+* Pulls game metadata directly from Steam API.
+* Extracts genre list and final price (in USD).
+* Handles API failure gracefully.
+
+### Model Integration
+* Aligned with final Jupyter notebook.
+* Uses three clusters:
+  * `genre_cluster`
+  * `categories_cluster`
+  * `remaining_clusters`
+* These cluster columns were chosen due to strong performance and complementary info.
+* Price, CCU, and other metadata are included in `remaining_clusters`.
+
+### Final Output
+* JSON object containing 15 games.
+* Each includes:
+  * AppID
+  * Name
+  * Price
+  * Peak CCU
+  * Description
+  * Steam store link
+  * Similarity score
+
 
   
 # Final Report
