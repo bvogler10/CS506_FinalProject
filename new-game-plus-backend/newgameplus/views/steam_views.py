@@ -104,11 +104,15 @@ def recommend_games(request):
     enriched = []
     for appid in game_ids:
         m = fetch_game_metadata(appid)
-        if m:
-            # fill in CCU from your clustered_df
-            row = clustered_df.loc[clustered_df.appid==appid, 'peak_ccu']
-            m['peak_ccu'] = int(row.iloc[0]) if not row.empty else 1
-            enriched.append(m)
+        if not m:
+            continue  # Skip bad metadata
+
+        row = clustered_df.loc[clustered_df.appid == appid]
+        if row.empty:
+            continue  # Skip games not in clustered_df
+
+        m['peak_ccu'] = int(row['peak_ccu'].iloc[0])
+        enriched.append(m)
     if not enriched:
         return JsonResponse({'error':'no metadata'}, status=500)
 
@@ -141,7 +145,7 @@ def recommend_games(request):
     user_profile = np.append(user_profile, list(append_normalized_clusters(comp, enriched[0], CLUSTER_COLS)))
 
     # 5) build weight vector: [price, peak_ccu] + genre one-hot columns + [genre_cluster, categories_cluster, remaining_clusters]
-    w = np.array([0.5, 1.2] + [5.0]*len(genre_cols) + [1.5, 1.0, 0.5])
+    w = np.array([1.0, 1.0] + [50.0]*len(genre_cols) + [1.0, 1.0, 1.0])
 
     # 6) compute weighted cosine similarities
     sims = np.array([weighted_cosine(user_profile, row, w) for row in M])
