@@ -1,0 +1,41 @@
+name: Notebook Test with Sample CSV
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+jobs:
+  test-notebook:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: Install Pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies
+        working-directory: new-game-plus-backend
+        run: pipenv install --dev
+      
+      - name: Copy test CSV to games.csv
+        working-directory: new-game-plus-backend
+        run: cp newgameplus/data/test_games.csv newgameplus/data/games.csv
+
+      - name: Run notebook with nbconvert
+        working-directory: new-game-plus-backend
+        run: |
+          pipenv run jupyter nbconvert \
+            --to notebook \
+            --execute \
+            --inplace \
+            --ExecutePreprocessor.timeout=120 \
+            newgameplus/notebook.ipynb
